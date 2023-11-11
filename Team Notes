@@ -7,5 +7,3 @@ git commit -a -m "_____"  <-- This commits the file to the local repository from
 git push origin <-- This pushes all the changes in the local repository to the remote repository
 
 Arm Control Video With PID Kooky: https://www.youtube.com/watch?v=E6H6Nqe6qJo
-
-Do not edit this document
