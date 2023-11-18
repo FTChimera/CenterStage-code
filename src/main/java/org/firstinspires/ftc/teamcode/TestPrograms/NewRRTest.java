@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.TestPrograms;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -13,12 +14,9 @@ public class NewRRTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         drive = new SampleMecanumDrive(hardwareMap);
         drive.setPoseEstimate(new Pose2d());
-        TrajectorySequence ts = drive.trajectorySequenceBuilder(new Pose2d())
-                .forward(10)
-                .build();                               
+
         waitForStart();
         if (opModeIsActive()){
-            drive.followTrajectorySequence(ts);
 
         }
     }
