@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 
 @TeleOp
-@Disabled
+//@Disabled
 public class Canyon extends LinearOpMode {
 
     SampleMecanumDrive drive;
@@ -24,6 +24,7 @@ public class Canyon extends LinearOpMode {
             lockToPosition(new Pose2d(0,0,0));
         }
 
+        return ;
     }
     public void lockToPosition(Pose2d targetPose){
         Pose2d currentPose = drive.getPoseEstimate();

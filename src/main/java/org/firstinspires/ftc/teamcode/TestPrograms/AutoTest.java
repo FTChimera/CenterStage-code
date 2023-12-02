@@ -38,6 +38,7 @@ public class AutoTest extends LinearOpMode {
 
         }
 
+        return ;
     }
     private void drive(double inches, double power, Direction direction){
         switch (direction){

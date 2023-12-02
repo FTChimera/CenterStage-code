@@ -28,7 +28,7 @@ public class StraightTestSimple extends LinearOpMode {
 
         waitForStart();
 
-        if (isStopRequested()) return;
+        if (isStopRequested()) return ;
 
 
 
@@ -43,5 +43,6 @@ public class StraightTestSimple extends LinearOpMode {
 
         }
 
+        return ;
     }
 }
