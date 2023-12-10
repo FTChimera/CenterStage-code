@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+@Disabled
 @Autonomous
 public class AutoTest extends LinearOpMode {
 
