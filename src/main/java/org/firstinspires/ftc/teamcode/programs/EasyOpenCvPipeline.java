@@ -12,6 +12,8 @@ public class EasyOpenCvPipeline extends OpenCvPipeline {
     Mat leftCrop;
     Mat rightCrop;
     public double leftValue, rightValue;
+    Rect rectLeft;
+    Rect rectRight;
 
     Mat output = new Mat();
     Scalar rectColor;
@@ -21,15 +23,20 @@ public class EasyOpenCvPipeline extends OpenCvPipeline {
     }
     public void setAlliance(int alliance){
         if (alliance == 1){
-            rectColor = new Scalar(0.0,175.0,206.0);
+            rectColor = new Scalar(79, 174, 205);
+            rectLeft = new Rect(180,185,20,20);
+            rectRight = new Rect(10,175, 20,20);
         }
-        else rectColor  = new Scalar(255.0,0.0,0.0);
+       else {
+         rectColor = new Scalar(255.0, 0.0, 0.0);
+            rectLeft = new Rect(10, 160, 20, 20);
+            rectRight = new Rect(180, 170, 20, 20);
+        }
     }
     @Override
     public Mat processFrame(Mat input) {
         Imgproc.cvtColor(input,yCrCb,Imgproc.COLOR_RGB2YCrCb);
-        Rect rectLeft = new Rect(10,160, 20,20);
-        Rect rectRight = new Rect(180,170,20,20);
+
         input.copyTo(output);
         Imgproc.rectangle(output,rectLeft,rectColor,2);
         Imgproc.rectangle(output,rectRight,rectColor,2);

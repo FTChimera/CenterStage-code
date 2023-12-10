@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -38,49 +39,64 @@ public class RedBackboard extends LinearOpMode {
         Servo grip2 = hardwareMap.servo.get("grip2");
         Servo droneLauncher = hardwareMap.servo.get("droneLauncher");
 
-        drive.setPoseEstimate(new Pose2d(15, -58, Math.toRadians(90)));
+        int slowerVelocity = 9;
+        drive.setPoseEstimate(new Pose2d(14, -58, Math.toRadians(90)));
         TrajectorySequence elementInLeft = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
-                .lineToSplineHeading(new Pose2d(13, -32, Math.toRadians(180)))
-                .forward(5)
-                .back(3)
+                .lineToSplineHeading(new Pose2d(13, -32, Math.toRadians(180)),
+                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .forward(5,
+                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .back(3,
+                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .waitSeconds(3)
-                .strafeTo(new Vector2d(45, -28.75))
+                .strafeTo(new Vector2d(45, -28.75),
+                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                 .waitSeconds(8)
                 //Deposit Pixel
-                .forward(2)
-                .strafeTo(new Vector2d(45, -60))
-                .back(15)
+                .forward(2,
+                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .strafeTo(new Vector2d(45, -60),
+                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                .back(15,
+                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
 
-                .addSpatialMarker(new Vector2d(13, -30), () -> {
-                    rollerIntake.setPower(-1);
-                })
-                .addSpatialMarker(new Vector2d(45, -28.75), () -> {
-                    rollerIntake.setPower(0);
-                })
-                .addSpatialMarker(new Vector2d(24, -31), () -> {
-                    leftSlide.setPower(1);
-                    rightSlide.setPower(1);
-                    outtakeLeft.setPosition(-1);
-                    outtakeRight.setPosition(1);
-                })
-                .addSpatialMarker(new Vector2d(30, -30.6), () -> {
-                    leftSlide.setPower(0);
-                    rightSlide.setPower(0);
-                })
-                .addSpatialMarker(new Vector2d(45, -28.75), () -> {
-                    grip1.setPosition(-0.5);
-                    grip1.setPosition(0.5);
-                })
-                .addSpatialMarker(new Vector2d(45, -40), () -> {
-                    outtakeLeft.setPosition(1);
-                    outtakeRight.setPosition(-1);
-                    leftSlide.setPower(-0.5);
-                    rightSlide.setPower(-0.5);
-                })
-                .addSpatialMarker(new Vector2d(45, -60), () -> {
-                    leftSlide.setPower(0);
-                    rightSlide.setPower(0);
-                })
+//                .addSpatialMarker(new Vector2d(13, -30), () -> {
+//                    rollerIntake.setPower(-1);
+//                })
+//                .addSpatialMarker(new Vector2d(45, -28.75), () -> {
+//                    rollerIntake.setPower(0);
+//                })
+//                .addSpatialMarker(new Vector2d(24, -31), () -> {
+//                    leftSlide.setPower(1);
+//                    rightSlide.setPower(1);
+//                    outtakeLeft.setPosition(-1);
+//                    outtakeRight.setPosition(1);
+//                })
+//                .addSpatialMarker(new Vector2d(30, -30.6), () -> {
+//                    leftSlide.setPower(0);
+//                    rightSlide.setPower(0);
+//                })
+//                .addSpatialMarker(new Vector2d(45, -28.75), () -> {
+//                    grip1.setPosition(-0.5);
+//                    grip1.setPosition(0.5);
+//                })
+//                .addSpatialMarker(new Vector2d(45, -40), () -> {
+//                    outtakeLeft.setPosition(1);
+//                    outtakeRight.setPosition(-1);
+//                    leftSlide.setPower(-0.5);
+//                    rightSlide.setPower(-0.5);
+//                })
+//                .addSpatialMarker(new Vector2d(45, -60), () -> {
+//                    leftSlide.setPower(0);
+//                    rightSlide.setPower(0);
+//                })
 
                 .build();
         TrajectorySequence elementInMiddle = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))

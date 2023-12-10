@@ -76,6 +76,20 @@ public class RedStacks extends LinearOpMode {
                 .strafeTo(new Vector2d(45, -34.5))
                 .back(15)
                 .build();
+        TrajectorySequence elementInRight = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
+                .lineToSplineHeading(new Pose2d(-35,-34, Math.toRadians(0)))
+                .forward(5)
+                .back(3)
+                .waitSeconds(3)
+                .lineToSplineHeading(new Pose2d(-35.5,-10, Math.toRadians(180)))
+                .waitSeconds(10)
+                .back(58)
+                .strafeTo(new Vector2d(44.5, -41))
+                .waitSeconds(3)
+                .strafeTo(new Vector2d(45, -10))
+                .back(15)
+                .waitSeconds(3)
+                .build();
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
         pipeline = new EasyOpenCvPipeline(webcam);
@@ -110,7 +124,7 @@ public class RedStacks extends LinearOpMode {
                 drive.followTrajectorySequence(elementInMiddle);
                 telemetry.addLine("Position: Middle");
             } else if (position == 3) {
-                //drive.followTrajectorySequence(elementInRight);
+                drive.followTrajectorySequence(elementInRight);
                 telemetry.addLine("Position: Right");
             }
             else {

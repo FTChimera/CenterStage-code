@@ -749,6 +749,7 @@ drawable btn_radio_off_to_on_mtrl_animation
 drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
 drawable button_shape
+drawable centerstage_background
 drawable feedback_shape_orange
 drawable freightfrenzy_background
 drawable ic_arrow_back_black_24dp
@@ -1301,16 +1302,6 @@ raw texture_fragment_shader
 raw texture_vertex_shader
 raw warningmessage
 raw zxing_beep
-string VUFORIA_INIT_ERROR_DEVICE_NOT_SUPPORTED
-string VUFORIA_INIT_ERROR_NO_CAMERA_ACCESS
-string VUFORIA_INIT_LICENSE_ERROR_CANCELED_KEY
-string VUFORIA_INIT_LICENSE_ERROR_INVALID_KEY
-string VUFORIA_INIT_LICENSE_ERROR_MISMATCH_KEY
-string VUFORIA_INIT_LICENSE_ERROR_MISSING_KEY
-string VUFORIA_INIT_LICENSE_ERROR_NO_NETWORK_PERMANENT
-string VUFORIA_INIT_LICENSE_ERROR_NO_NETWORK_TRANSIENT
-string VUFORIA_INIT_LICENSE_ERROR_PRODUCT_TYPE_MISMATCH
-string VUFORIA_INIT_LICENSE_ERROR_UNKNOWN_ERROR
 string abc_action_bar_home_description
 string abc_action_bar_up_description
 string abc_action_menu_overflow_description
@@ -1523,6 +1514,8 @@ string device_info
 string device_name_format_ds
 string device_name_format_rc
 string device_type
+string dfrobot_huskylens_description
+string dfrobot_huskylens_name
 string dialogEnableModifyingSettingsMessage
 string dialogEnableModifyingSettingsTitle
 string dialogMessagePleaseWait
