@@ -39,7 +39,7 @@ public class RedBackboard extends LinearOpMode {
         Servo grip2 = hardwareMap.servo.get("grip2");
         Servo droneLauncher = hardwareMap.servo.get("droneLauncher");
 
-        int slowerVelocity = 9;
+        int slowerVelocity = 30;
         drive.setPoseEstimate(new Pose2d(14, -58, Math.toRadians(90)));
         TrajectorySequence elementInLeft = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
                 .lineToSplineHeading(new Pose2d(13, -32, Math.toRadians(180)),
