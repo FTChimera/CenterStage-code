@@ -35,6 +35,7 @@ public class SehujOp extends LinearOpMode {// Start of Code
         Servo grip1 = hardwareMap.servo.get("grip1");
         Servo grip2 = hardwareMap.servo.get("grip2");
         Servo droneLauncher = hardwareMap.servo.get("droneLauncher");
+        Servo tiltServo = hardwareMap.servo.get("tiltServo");
 
         // Set Modes For Certain Motors
         leftSlide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -45,7 +46,7 @@ public class SehujOp extends LinearOpMode {// Start of Code
         // Reverse Motor Directions
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         leftSlide.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightSlide.setDirection(DcMotorSimple.Direction.REVERSE);
+//        rightSlide.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();// Wait for Play to Be Clicked
 
@@ -108,16 +109,18 @@ public class SehujOp extends LinearOpMode {// Start of Code
             }
 
             if (gamepad2.b){
-                outtakeLeft.setPosition(1);
-                outtakeRight.setPosition(-1);
-            }
-
-            if (gamepad2.y){
                 flipDownServo.setPosition(1);
             }
-            if (gamepad2.x){
+
+            if (gamepad2.y){// DOWN
+                outtakeLeft.setPosition(1);
+                outtakeRight.setPosition(-1);
+                tiltServo.setPosition(-1);
+            }
+            if (gamepad2.x){ //UP
                 outtakeLeft.setPosition(-1);
                 outtakeRight.setPosition(1);
+                tiltServo.setPosition(1);
             }
 
             if (gamepad1.x){

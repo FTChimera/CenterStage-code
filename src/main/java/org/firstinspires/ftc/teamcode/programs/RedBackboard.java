@@ -8,21 +8,36 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
+
+import java.util.concurrent.TimeUnit;
 
 @Config
 @Autonomous
 public class RedBackboard extends LinearOpMode {
       OpenCvWebcam webcam;
       EasyOpenCvPipeline pipeline;
+      double headingError;
+      double rangeError;
+      ElapsedTime timer = new ElapsedTime();
+     int DESIRED_TAG_ID = 1;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    private VisionPortal visionPortal;               // Used to manage the video source.
+    private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
+    private AprilTagDetection desiredTag; // Used to hold the data for a detected AprilTag
+    boolean tagFound;
     @Override
     public void runOpMode() throws InterruptedException {
         SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
@@ -38,92 +53,147 @@ public class RedBackboard extends LinearOpMode {
         Servo grip1 = hardwareMap.servo.get("grip1");
         Servo grip2 = hardwareMap.servo.get("grip2");
         Servo droneLauncher = hardwareMap.servo.get("droneLauncher");
+        Servo tiltServo = hardwareMap.servo.get("tiltServo");
 
-        int slowerVelocity = 30;
         drive.setPoseEstimate(new Pose2d(14, -58, Math.toRadians(90)));
         TrajectorySequence elementInLeft = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
-                .lineToSplineHeading(new Pose2d(13, -32, Math.toRadians(180)),
-                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .forward(5,
-                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .back(3,
-                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .waitSeconds(3)
-                .strafeTo(new Vector2d(45, -28.75),
-                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .waitSeconds(8)
-                //Deposit Pixel
-                .forward(2,
-                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .strafeTo(new Vector2d(45, -60),
-                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                .back(15,
-                        SampleMecanumDrive.getVelocityConstraint(slowerVelocity, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                        SampleMecanumDrive.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-
-//                .addSpatialMarker(new Vector2d(13, -30), () -> {
-//                    rollerIntake.setPower(-1);
-//                })
-//                .addSpatialMarker(new Vector2d(45, -28.75), () -> {
-//                    rollerIntake.setPower(0);
-//                })
-//                .addSpatialMarker(new Vector2d(24, -31), () -> {
-//                    leftSlide.setPower(1);
-//                    rightSlide.setPower(1);
-//                    outtakeLeft.setPosition(-1);
-//                    outtakeRight.setPosition(1);
-//                })
-//                .addSpatialMarker(new Vector2d(30, -30.6), () -> {
-//                    leftSlide.setPower(0);
-//                    rightSlide.setPower(0);
-//                })
-//                .addSpatialMarker(new Vector2d(45, -28.75), () -> {
-//                    grip1.setPosition(-0.5);
-//                    grip1.setPosition(0.5);
-//                })
-//                .addSpatialMarker(new Vector2d(45, -40), () -> {
-//                    outtakeLeft.setPosition(1);
-//                    outtakeRight.setPosition(-1);
-//                    leftSlide.setPower(-0.5);
-//                    rightSlide.setPower(-0.5);
-//                })
-//                .addSpatialMarker(new Vector2d(45, -60), () -> {
-//                    leftSlide.setPower(0);
-//                    rightSlide.setPower(0);
-//                })
-
-                .build();
-        TrajectorySequence elementInMiddle = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
-                .lineToConstantHeading(new Vector2d(12, -31))
-                .back(2)
-                .waitSeconds(3)
-                .setReversed(true)
-                .splineTo(new Vector2d(45, -34.5), Math.toRadians(0))
-                .setReversed(false)
-                .waitSeconds(1)
-                //Deposit Pixel
-                .forward(2)
-                .strafeTo(new Vector2d(45, -60))
-                .back(15)
-                .build();
-        TrajectorySequence elementInRight = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
-                .strafeTo(new Vector2d(23,-40))
+                .lineToSplineHeading(new Pose2d(13, -30, Math.toRadians(180)))
                 .forward(5)
                 .back(3)
-                .waitSeconds(3)
+                .addTemporalMarker(() -> rollerIntake.setPower(-1))
+                .addTemporalMarker(() -> intakeMotor.setPower(-0.1))
+                .waitSeconds(1.25)
+                .addTemporalMarker(() -> rollerIntake.setPower(0))
+                .addTemporalMarker(() -> intakeMotor.setPower(0))
+                .strafeTo(new Vector2d(40.5, -30))
+                //APRIL TAG LOCALIZER
+                .addTemporalMarker(() -> {
+                    DESIRED_TAG_ID = 4;
+                    tagFound = false;
+                    initAprilTag();
+                    setManualExposure(6,250);
+                    for (AprilTagDetection detection : aprilTag.getDetections()){
+                        if ( detection.metadata!= null && (detection.id == DESIRED_TAG_ID)) {
+                            // Yes, we want to use this tag.
+                          tagFound = true;
+                            desiredTag = detection;
+                            break;  // don't look any further.
+                        }
+                    }
+                    rangeError = desiredTag.ftcPose.range-12;
+                    headingError = desiredTag.ftcPose.bearing;
+                })
+                .turn(headingError)
+                .forward(rangeError)
+                //END APRIL TAG LOCALIZER
+                .addTemporalMarker(() -> leftSlide.setTargetPosition(-500))
+                .addTemporalMarker(() -> leftSlide.setPower(1))
+                .addTemporalMarker(() -> leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .addTemporalMarker(() -> rightSlide.setTargetPosition(500))
+                .addTemporalMarker(() -> rightSlide.setPower(1))
+                .addTemporalMarker(() -> rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .waitSeconds(0.75)
+                .addTemporalMarker(() -> outtakeLeft.setPosition(-1))
+                .addTemporalMarker(() -> outtakeRight.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> tiltServo.setPosition(1))
+                .waitSeconds(1.5)
+                .back(11)
+                .addTemporalMarker(() -> grip1.setPosition(-0.5))
+                .addTemporalMarker(() -> grip2.setPosition(0.5))
+                .waitSeconds(0.75)
+                .forward(5)
+                .strafeTo(new Vector2d(45, -57))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setTargetPosition(10))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setPower(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setTargetPosition(-10))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setPower(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> outtakeLeft.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> outtakeRight.setPosition(-1))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> tiltServo.setPosition(-1))
+                .waitSeconds(2.5)
+                .build();
+        TrajectorySequence elementInMiddle = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
+                .lineToConstantHeading(new Vector2d(12, -28))
+                .back(4)
+                .addTemporalMarker(() -> rollerIntake.setPower(-1))
+                .addTemporalMarker(() -> intakeMotor.setPower(-0.1))
+                .waitSeconds(1.25)
+                .addTemporalMarker(() -> rollerIntake.setPower(0))
+                .addTemporalMarker(() -> intakeMotor.setPower(0))
                 .setReversed(true)
-                .splineTo(new Vector2d(45, -40.75), Math.toRadians(0))
+                .splineTo(new Vector2d(40.5, -31), Math.toRadians(0))
                 .setReversed(false)
-                .waitSeconds(1)
-                //Deposit Pixel
-                .strafeTo(new Vector2d(45, -60))
-                .back(15)
+                // APRIL TAG LOCALIZER
+                .addTemporalMarker(() -> leftSlide.setTargetPosition(-500))
+                .addTemporalMarker(() -> leftSlide.setPower(1))
+                .addTemporalMarker(() -> leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .addTemporalMarker(() -> rightSlide.setTargetPosition(500))
+                .addTemporalMarker(() -> rightSlide.setPower(1))
+                .addTemporalMarker(() -> rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .waitSeconds(0.75)
+                .addTemporalMarker(() -> outtakeLeft.setPosition(-1))
+                .addTemporalMarker(() -> outtakeRight.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> tiltServo.setPosition(1))
+                .waitSeconds(1.5)
+                .back(11)
+                .addTemporalMarker(() -> grip1.setPosition(-0.5))
+                .addTemporalMarker(() -> grip2.setPosition(0.5))
+                .waitSeconds(0.75)
+                .forward(5)
+                .strafeTo(new Vector2d(45, -57))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setTargetPosition(10))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setPower(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setTargetPosition(-10))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setPower(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> outtakeLeft.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> outtakeRight.setPosition(-1))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> tiltServo.setPosition(-1))
+                .waitSeconds(2.5)
+                .build();
+        TrajectorySequence elementInRight = drive.trajectorySequenceBuilder(new Pose2d(14, -58, Math.toRadians(90)))
+                .lineToConstantHeading(new Vector2d(21.5, -40))
+                .forward(5)
+                .back(3)
+                .addTemporalMarker(() -> rollerIntake.setPower(-1))
+                .addTemporalMarker(() -> intakeMotor.setPower(-0.1))
+                .waitSeconds(1.25)
+                .addTemporalMarker(() -> rollerIntake.setPower(0))
+                .addTemporalMarker(() -> intakeMotor.setPower(0))
+                .setReversed(true)
+                .splineTo(new Vector2d(40.5, -37.5), Math.toRadians(0))
+                .setReversed(false)
+                // APRIL TAG LOCALIZER
+                .addTemporalMarker(() -> leftSlide.setTargetPosition(-500))
+                .addTemporalMarker(() -> leftSlide.setPower(1))
+                .addTemporalMarker(() -> leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .addTemporalMarker(() -> rightSlide.setTargetPosition(500))
+                .addTemporalMarker(() -> rightSlide.setPower(1))
+                .addTemporalMarker(() -> rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .waitSeconds(0.75)
+                .addTemporalMarker(() -> outtakeLeft.setPosition(-1))
+                .addTemporalMarker(() -> outtakeRight.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0.5, () -> tiltServo.setPosition(1))
+                .waitSeconds(1.5)
+                .back(11)
+                .addTemporalMarker(() -> grip1.setPosition(-0.5))
+                .addTemporalMarker(() -> grip2.setPosition(0.5))
+                .waitSeconds(0.75)
+                .forward(5)
+                .strafeTo(new Vector2d(45, -57))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setTargetPosition(10))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setPower(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> leftSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setTargetPosition(-10))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setPower(0.5))
+                .UNSTABLE_addTemporalMarkerOffset(0.8, () -> rightSlide.setMode(DcMotor.RunMode.RUN_TO_POSITION))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> outtakeLeft.setPosition(1))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> outtakeRight.setPosition(-1))
+                .UNSTABLE_addTemporalMarkerOffset(0, () -> tiltServo.setPosition(-1))
+                .waitSeconds(2.5)
                 .build();
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -137,6 +207,12 @@ public class RedBackboard extends LinearOpMode {
             public void onOpened()
             {
                 webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+                flipDownServo.setPosition(-1);
+                droneLauncher.setPosition(-1);
+                grip1.setPosition(1);
+                grip2.setPosition(-0.7);
+                outtakeLeft.setPosition(1);
+                outtakeRight.setPosition(-1);
             }
             @Override
             public void onError(int errorCode)
@@ -152,12 +228,6 @@ public class RedBackboard extends LinearOpMode {
 
         if (opModeIsActive()) {
             while (pipeline.leftValue == 0 && pipeline.rightValue == 0){ // waits for webcam to start sensing
-            flipDownServo.setPosition(-1);
-            droneLauncher.setPosition(-1);
-            grip1.setPosition(1);
-            grip2.setPosition(-0.7);
-            outtakeLeft.setPosition(1);
-            outtakeRight.setPosition(-1);
             }
             int position = pipeline.getLocation();
             if (position == 2) {
@@ -175,4 +245,66 @@ public class RedBackboard extends LinearOpMode {
             webcam.stopStreaming();
         }
     }
-}
+    private void initAprilTag() {
+        // Create the AprilTag processor by using a builder.
+        aprilTag = new AprilTagProcessor.Builder().build();
+
+        // Adjust Image Decimation to trade-off detection-range for detection-rate.
+        // eg: Some typical detection data using a Logitech C920 WebCam
+        // Decimation = 1 ..  Detect 2" Tag from 10 feet away at 10 Frames per second
+        // Decimation = 2 ..  Detect 2" Tag from 6  feet away at 22 Frames per second
+        // Decimation = 3 ..  Detect 2" Tag from 4  feet away at 30 Frames Per Second
+        // Decimation = 3 ..  Detect 5" Tag from 10 feet away at 30 Frames Per Second
+        // Note: Decimation can be changed on-the-fly to adapt during a match.
+        aprilTag.setDecimation(2);
+
+        // Create the vision portal by using a builder.
+
+            visionPortal = new VisionPortal.Builder()
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 2"))
+                    .addProcessor(aprilTag)
+                    .build();
+
+    }
+    public void    setManualExposure(int exposureMS, int gain) {
+        // Wait for the camera to be open, then use the controls
+
+        if (visionPortal == null) {
+            return;
+        }
+
+        // Make sure camera is streaming before we try to set the exposure controls
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            telemetry.addData("Camera", "Waiting");
+            telemetry.update();
+            while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                waitSeconds(2);
+            }
+            telemetry.addData("Camera", "Ready");
+            telemetry.update();
+        }
+
+        // Set camera controls unless we are stopping.
+        if (!isStopRequested())
+        {
+            ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+                waitSeconds(2);
+            }
+            exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
+            waitSeconds(2);
+            GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(gain);
+            waitSeconds(2);
+        }
+    }
+  public void waitSeconds(double seconds){
+        timer.reset();
+        while (timer.seconds() < seconds){
+
+        }
+    }
+
+    }
+
